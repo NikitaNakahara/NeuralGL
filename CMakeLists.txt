@@ -1,4 +1,4 @@
-cmake_minimum_required(VESRION 3.12)
+cmake_minimum_required(VERSION 3.12)
 
 set(LIB_NAME NGL)
 
@@ -7,29 +7,27 @@ project(${LIB_NAME}
     DESCRIPTION "Template for C++ library built with CMake"
     LANGUAGES CXX)
 
-add_library(${LIB_NAME})
-add_library(${LIB_NAME}:${LIB_NAME} ALIAS ${LIB_NAME})
-
+add_library(${LIB_NAME}) # initialized below
+add_library(${LIB_NAME}::${LIB_NAME} ALIAS ${LIB_NAME})
+    
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}"
-    is_top_level)
+    is_top_level
+)
 
 include(cmake/utils.cmake)
 include(GNUInstallDirs)
 
 # NGL_SHARED_LIBS determines static/shared build when defined
-option(NGL_BUILD_TESTS "Build NGL tests" OFF)
-option(NGL_BUILD_EXAMPLES "Build NGL examples" OFF)
-option(NGL_INSTALL "Generate target for installing NGL" ${is_top_level})
-set_if_undefined(NGL_INSTALL_CMAKEDIR 
-    "${CMAKE_INSTALL_LIBDIR}/cmake/NGL-${PROJECT_VERSION}" CACHE STRING
-    "Install path for NGL package-related CMake files")
+option(${LIB_NAME}_BUILD_TESTS "Build ${LIB_NAME} tests" OFF)
+option(${LIB_NAME}_BUILD_EXAMPLES "Build ${LIB_NAME} examples" OFF)
+option(${LIB_NAME}_INSTALL "Generate target for installing ${LIB_NAME}" ${is_top_level})
+set(${LIB_NAME}_INSTALL_CMAKEDIR 
+    "${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_NAME}-${PROJECT_VERSION}" CACHE STRING
+    "Install path for ${LIB_NAME} package-related CMake files")
 
-if(DEFINED NGL_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS ${NGL_SHARED_LIBS})
+if(DEFINED ${LIB_NAME}_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS ${${LIB_NAME}_SHARED_LIBS})
 endif()
-
-set_if_undefined(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set_if_undefined(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 include(GenerateExportHeader)
 set(export_file_name "export_shared.h")
@@ -40,26 +38,27 @@ endif()
 
 generate_export_header(${LIB_NAME} EXPORT_FILE_NAME include/${LIB_NAME}/${export_file_name})
 
+set(private_headers
+    include/${LIB_NAME}
+)
 set(public_headers
-    include/${LIB_NAME}/export.hpp
     include/${LIB_NAME}/ngl.hpp)
-
 set(sources
     ${public_headers}
     src/init.cpp)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 
 list(APPEND public_headers
-    "${CMAKE_CURRENT_BINARY_DIR}/include/mylib/${export_file_name}")
+    "${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}/${export_file_name}")
 list(APPEND sources
-    "${CMAKE_CURRENT_BINARY_DIR}/include/mylib/${export_file_name}")
+    "${CMAKE_CURRENT_BINARY_DIR}/include/${LIB_NAME}/${export_file_name}")
 
 include(CMakePackageConfigHelpers)
 
 target_sources(${LIB_NAME} PRIVATE ${sources})
 target_compile_definitions(${LIB_NAME}
     PUBLIC
-        "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:NGL_STATIC_DEFINE")
+        "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:${LIB_NAME}_STATIC_DEFINE")
 
 target_include_directories(${LIB_NAME}
     PUBLIC
@@ -74,37 +73,37 @@ set_target_properties(${LIB_NAME} PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
     VERSION ${PROJECT_VERSION})
 
-if(NGL_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
-    configure_package_config_file(cmake/ngl-config.cmake.in ngl-config.cmake
-    INSTALL_DESTINATION "${NGL_INSTALL_CMAKEDIR}")
+if(${LIB_NAME}_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
+    configure_package_config_file(cmake/${LIB_NAME}-config.cmake.in ${LIB_NAME}-config.cmake
+    INSTALL_DESTINATION "${${LIB_NAME}_INSTALL_CMAKEDIR}")
 
-    write_basic_package_version_file(ngl-config-version.cmake
+    write_basic_package_version_file(${LIB_NAME}-config-version.cmake
     COMPATIBILITY SameMajorVersion)
 
-    install(TARGETS ${LIB_NAME} EXPORT ngl_export
+    install(TARGETS ${LIB_NAME} EXPORT ${LIB_NAME}_export
     RUNTIME COMPONENT ${LIB_NAME}
-    LIBRARY COMPONENT ${LIB_NAME} NAMELINK_COMPONENT ngl-dev
-    ARCHIVE COMPONENT ngl-dev
-    PUBLIC_HEADER COMPONENT ngl-dev
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/NGL")
+    LIBRARY COMPONENT ${LIB_NAME} NAMELINK_COMPONENT ${LIB_NAME}-dev
+    ARCHIVE COMPONENT ${LIB_NAME}-dev
+    PUBLIC_HEADER COMPONENT ${LIB_NAME}-dev
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${LIB_NAME}")
 
-    set(targets_file "ngl-shared-targets.cmake")
+    set(targets_file "${LIB_NAME}-shared-targets.cmake")
 
     if(NOT BUILD_SHARED_LIBS)
-    set(targets_file "ngl-static-targets.cmake")
+    set(targets_file "${LIB_NAME}-static-targets.cmake")
     endif()
 
-    install(EXPORT ngl_export
-    COMPONENT ngl-dev
+    install(EXPORT ${LIB_NAME}_export
+    COMPONENT ${LIB_NAME}-dev
     FILE "${targets_file}"
-    DESTINATION "${NGL_INSTALL_CMAKEDIR}"
+    DESTINATION "${${LIB_NAME}_INSTALL_CMAKEDIR}"
     NAMESPACE ${LIB_NAME}::)
 
     install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/ngl-config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/ngl-config-version.cmake"
-    COMPONENT ngl-dev
-    DESTINATION "${NGL_INSTALL_CMAKEDIR}")
+    "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${LIB_NAME}-config-version.cmake"
+    COMPONENT ${LIB_NAME}-dev
+    DESTINATION "${${LIB_NAME}_INSTALL_CMAKEDIR}")
 endif()
 
 if(MSVC)
@@ -112,52 +111,18 @@ if(MSVC)
     set(pdb_file_destination "")
 
     if(BUILD_SHARED_LIBS)
-        set(pdb_file "$<TARGET_PDB_FILE:ngl>")
+        set(pdb_file "$<TARGET_PDB_FILE:${LIB_NAME}>")
         set(pdb_file_destination "${CMAKE_INSTALL_BINDIR}")
     else()
         # TARGET_PDB_FILE does not work for pdb file generated by compiler
         # during static library build, need to determine it another way
-        set(pdb_file "$<TARGET_FILE_DIR:ngl>/$<TARGET_FILE_PREFIX:ngl>$<TARGET_FILE_BASE_NAME:ngl>.pdb")
+        set(pdb_file "$<TARGET_FILE_DIR:${LIB_NAME}>/$<TARGET_FILE_PREFIX:${LIB_NAME}>$<TARGET_FILE_BASE_NAME:${LIB_NAME}>.pdb")
         set(pdb_file_destination "${CMAKE_INSTALL_LIBDIR}")
     endif()
 
     install(FILES "${pdb_file}"
-        COMPONENT ngl-dev
+        COMPONENT ${LIB_NAME}-dev
         CONFIGURATIONS Debug RelWithDebInfo
         DESTINATION "${pdb_file_destination}"
         OPTIONAL)
-endif()
-
-macro(import_targets type)
-    if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/ngl-${type}-targets.cmake")
-        set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE
-            "ngl ${type} libraries were requested but not found")
-        set(${CMAKE_FIND_PACKAGE_NAME}_FOUND OFF)
-        return()
-    endif()
-
-    include("${CMAKE_CURRENT_LIST_DIR}/ngl-${type}-targets.cmake")
-endmacro()
-
-if(NOT TARGET ${LIB_NAME}::${LIB_NAME})
-    set(type "")
-
-    if(DEFINED NGL_SHARED_LIBS)
-        if(NGL_SHARED_LIBS)
-            set(type "shared")
-        else()
-            set(type "static")
-        endif()
-    elseif(BUILD_SHARED_LIBS AND
-           EXISTS "${CMAKE_CURRENT_LIST_DIR}/ngl-shared-targets.cmake")
-        set(type "shared")
-    elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/ngl-static-targets.cmake")
-        set(type "static")
-    else()
-        set(type "shared")
-    endif()
-
-    import_targets(${type})
-    check_required_components(${LIB_NAME})
-    message("-- Found ${type} ngl (version ${${CMAKE_FIND_PACKAGE_NAME}_VERSION})")
 endif()

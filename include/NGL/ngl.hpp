@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mylib/export.h>
+#include <NGL/export.h>
 
-namespace ngl {
-    MYLIB_EXPORT void init();;
-}
+struct NGLWindow;
+
+NGL_EXPORT NGLWindow* nglCreateWindow();
