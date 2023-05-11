@@ -1,8 +1,8 @@
-#include <NGL/framebuffer.hpp>
+#include "framebuffer.hpp"
 
 #include <linux/fb.h>
 
 
-char* getFramebufferPointer() {
+const char* getFramebufferPointer() {
     return "";
 }

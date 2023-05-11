@@ -1,6 +1,6 @@
 #include <NGL/ngl.hpp>
 
-#include <NGL/framebuffer.hpp>
+#include "framebuffer.hpp"
 
 #include <iostream>
 
