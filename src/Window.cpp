@@ -34,6 +34,7 @@ namespace ngl {
 
         if (__parentID == nullptr) _id->pDisplay = XOpenDisplay(nullptr);
         else _id->pDisplay = __parentID->pDisplay;
+        
         if (_id->pDisplay == nullptr) {
             lastError = "can't create X-11 device";
         }
