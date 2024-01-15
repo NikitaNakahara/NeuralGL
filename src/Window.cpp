@@ -5,6 +5,8 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
+#include "error.hpp"
+
 namespace ngl {
     struct WndID {
         #if defined(__linux__)
@@ -26,16 +28,15 @@ namespace ngl {
         char* iconName;
 
         _id = (WndID*)malloc(sizeof(WndID));
-        /*
         if (_id == nullptr) {
-            System::logCritical("Window", "can't init memory for WndID");
-        }*/
+            lastError = "can't init memory for WndID";
+        }
 
         if (__parentID == nullptr) _id->pDisplay = XOpenDisplay(nullptr);
         else _id->pDisplay = __parentID->pDisplay;
-        /*if (_id->pDisplay == nullptr) {
-            System::logCritical("Window", "can't create X-11 device");
-        }*/
+        if (_id->pDisplay == nullptr) {
+            lastError = "can't create X-11 device";
+        }
 
         int screen =        DefaultScreen(_id->pDisplay);
         Window root =       RootWindow(_id->pDisplay, screen);
