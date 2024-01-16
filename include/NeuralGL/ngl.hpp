@@ -9,4 +9,6 @@ namespace ngl {
     void initOpenGLContext(NGLWindow *__window);
     
     std::string getLastError();
+
+    void clearWindow(NGLWindow* __window);
 }

@@ -5,10 +5,11 @@
 
 #include <string>
 #include <stdlib.h>
+#include <iostream>
 
 namespace ngl {
     struct NGLWindow {
-        MyWindow windowObj;
+        MyWindow* window;
         int width, height;
         std::string title;
     };
@@ -16,13 +17,18 @@ namespace ngl {
     NGLWindow* createWindow(int __width, int __height, std::string __title) {
         NGLWindow* window = (NGLWindow*)malloc(sizeof(NGLWindow));
 
-        if (window == nullptr) lastError = "Can't create window: haven't memory";
+        if (window == nullptr) {
+            lastError = "Can't create window: haven't memory";
+            return nullptr;
+        }
+
+        window->window = new MyWindow(__width, __height, __title);
 
         return window;
     }
 
     void initOpenGLContext(NGLWindow *__window) {
-        __window->windowObj.initOpenGLContext();
+        __window->window->initOpenGLContext();
     }
 
     std::string getLastError() {
@@ -30,5 +36,10 @@ namespace ngl {
         lastError = "";
         
         return error;
+    }
+
+    void clearWindow(NGLWindow* __window) {
+        free(__window->window);
+        free(__window);
     }
 }

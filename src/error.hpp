@@ -3,5 +3,5 @@
 #include <string>
 
 namespace ngl {
-    std::string lastError = "";
+    static std::string lastError = "";
 }

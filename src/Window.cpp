@@ -7,6 +7,8 @@
 
 #include "error.hpp"
 
+#include <iostream>
+
 namespace ngl {
     struct WndID {
         #if defined(__linux__)
@@ -18,6 +20,7 @@ namespace ngl {
     MyWindow::MyWindow(int __width, int __height, std::string __title, bool __createFullscreen, WndID* __parentID)
         : _width(__width), _height(__height), _title(__title) {
         #if defined(__linux__)
+
         XSetWindowAttributes attrs;
         XSizeHints sizeHint;
         XClassHint classHint;
@@ -30,13 +33,14 @@ namespace ngl {
         _id = (WndID*)malloc(sizeof(WndID));
         if (_id == nullptr) {
             lastError = "can't init memory for WndID";
+            return;
         }
-
+        
         if (__parentID == nullptr) _id->pDisplay = XOpenDisplay(nullptr);
         else _id->pDisplay = __parentID->pDisplay;
-        
         if (_id->pDisplay == nullptr) {
             lastError = "can't create X-11 device";
+            return;
         }
 
         int screen =        DefaultScreen(_id->pDisplay);
