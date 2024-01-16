@@ -27,7 +27,7 @@ namespace ngl {
         return window;
     }
 
-    void initOpenGLContext(NGLWindow *__window) {
+    void initOpenGLContext(NGLWindow* __window) {
         __window->window->initOpenGLContext();
     }
 
@@ -41,5 +41,9 @@ namespace ngl {
     void clearWindow(NGLWindow* __window) {
         free(__window->window);
         free(__window);
+    }
+
+    void swapBuffers(NGLWindow* __window) {
+        __window->window->swapBuffers();
     }
 }

@@ -15,11 +15,11 @@ namespace ngl {
 
         void initOpenGLContext();
 
-        void draw();
-
         WndID* getWindowID() { return _id; }
 
         Display* getDisplayPtr();
+
+        void swapBuffers();
 
     private:
         WndID* _id;

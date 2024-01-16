@@ -104,10 +104,7 @@ namespace ngl {
         glXMakeCurrent(_id->pDisplay, _id->id, _glContext);
     }
 
-    void MyWindow::draw() {
-        glClearColor(0.0, 0.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-
+    void MyWindow::swapBuffers() {
         #if defined(__linux__)
         glXSwapBuffers(_id->pDisplay, _id->id);
         #endif
